@@ -21,7 +21,6 @@ Ext.define('CustomApp', {
         var project = this.getContext().getProject();
         var projectRef = project._ref;
         this._projectOid = project.ObjectID;
-        console.log(project);
         var releaseStartDate = release.get('ReleaseStartDate');
         var releaseDate = release.get('ReleaseDate');
         var releaseStartDateISO = Rally.util.DateTime.toIsoString(releaseStartDate,true);
@@ -61,16 +60,12 @@ Ext.define('CustomApp', {
      
     _getVelocity: function(store,iterations) {
         var that = this;
-        var deferred = Ext.create('Deft.Deferred');
         _.each(iterations,function(iteration){
-    
-            var start_date_iso = Rally.util.DateTime.toIsoString(iteration.get('StartDate'),true);
-            var end_date_iso = Rally.util.DateTime.toIsoString(iteration.get('EndDate'),true);
-            
-            var currentProjectOID = parseInt(that.getContext().getProjectRef().match(/\d+/), 10);
+            var startDateISO = Rally.util.DateTime.toIsoString(iteration.get('StartDate'),true);
+            var endDateISO = Rally.util.DateTime.toIsoString(iteration.get('EndDate'),true);
             Ext.create('Rally.data.lookback.SnapshotStore',{
                 autoLoad: true,
-                fetch: ['FormattedID','PlanEstimate','ScheduleState'],
+                fetch: ['FormattedID','PlanEstimate','ScheduleState','Iteration'],
                 hydrate: ['ScheduleState'],
                 filters: [
                     {
@@ -80,17 +75,17 @@ Ext.define('CustomApp', {
                     },
                     {
                         property: '_ProjectHierarchy',
-                        value: currentProjectOID
+                        value: this._projectOid
                     },
                     {
                         property: '_ValidFrom',
                         operator: '>=',
-                        value:start_date_iso
+                        value:startDateISO
                     },
                     {
                         property: '_ValidFrom',
                         operator: '<=',
-                        value:end_date_iso
+                        value:endDateISO
                     }
                 ],
                 listeners: {
